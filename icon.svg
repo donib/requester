@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   sodipodi:docname="icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="2.9540685"
+     inkscape:cx="256.93378"
+     inkscape:cy="499.48063"
+     inkscape:window-width="1387"
+     inkscape:window-height="1032"
+     inkscape:window-x="2690"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Camada 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="color:#000000;fill:#8600c2;stroke-width:0.988768;-inkscape-stroke:none"
+       d="m 62.840772,112.48438 -0.675961,0.21679 c -7.352492,2.35841 -12.360809,9.33128 -12.362077,17.21289 v 0.002 c 0.0013,7.88159 5.009587,14.85448 12.362077,17.21289 l 0.675961,0.21679 z m 10.168066,0.29296 v 0.77149 33.49804 l 0.704604,-0.27343 c 6.840696,-2.66136 11.36664,-9.37139 11.369138,-16.85742 -1.2e-4,-7.48818 -4.526486,-14.20312 -11.369138,-16.86524 z m -11.208741,1.28711 v 31.70117 C 55.280553,143.3306 50.847314,137.07115 50.84532,129.91602 v -0.002 c 0.002,-7.15514 4.435228,-13.41458 10.954777,-15.84961 z m 12.249417,0.39258 c 6.010416,2.6946 9.992283,8.69319 9.992391,15.45899 -0.0031,6.76296 -3.984358,12.75762 -9.992391,15.45117 z"
+       id="path1330"
+       inkscape:export-filename="path1330.png"
+       inkscape:export-xdpi="23.315214"
+       inkscape:export-ydpi="23.315214" />
+    <rect
+       style="fill:#8600c2;fill-opacity:1;stroke:none;stroke-width:1.05304;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1860"
+       width="10.682932"
+       height="7.7026539"
+       x="62.495571"
+       y="125.92944" />
+  </g>
+</svg>
