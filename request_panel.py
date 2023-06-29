@@ -7,6 +7,16 @@ from requests import request
 from requests.exceptions import ConnectionError
 
 
+class TabPanelRTX(wx.Panel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.dataRTX = wx.richtext.RichTextCtrl(
+            self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
+        mainSizer.Add(self.dataRTX, 1, wx.EXPAND | wx.ALL, 10)
+        self.SetSizer(mainSizer)
+
+
 class RequestPanel (wx.Panel):
 
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size(800, 500), style=wx.TAB_TRAVERSAL, name=wx.EmptyString):
@@ -43,27 +53,17 @@ class RequestPanel (wx.Panel):
         self.headerSizer.Add(self.headerGrid, 1, wx.ALL, 5)
         mainSizer.Add(self.headerSizer, 0, wx.ALL | wx.EXPAND, 5)
 
-        responseSizer = wx.BoxSizer(wx.VERTICAL)
+        self.notebook = wx.Notebook(self)
 
-        self.responseLblSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.responseLbl = wx.StaticText(
-            self, id=wx.ID_ANY, label="Response")
-        self.responseLblSizer.Add(self.responseLbl, 0, wx.LEFT, 5)
-        self.statusCodeLbl = wx.StaticText(
-            self, id=wx.ID_ANY, label="")
-        self.responseLblSizer.Add(self.statusCodeLbl, 0,
-                                  wx.LEFT, 5)
-        self.responseTypeLbl = wx.StaticText(
-            self, id=wx.ID_ANY, label="")
-        self.responseLblSizer.Add(self.responseTypeLbl, 0, wx.LEFT, 5)
-        responseSizer.Add(self.responseLblSizer, 0, wx.ALL | wx.EXPAND, 5)
+        self.tabResponse = TabPanelRTX(self.notebook)
+        self.tabResponse.dataRTX.SetEditable(False)
 
-        self.responseRtc = wx.richtext.RichTextCtrl(
-            self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
-        self.responseRtc.SetEditable(False)
-        responseSizer.Add(self.responseRtc, 1, wx.EXPAND | wx.ALL, 10)
+        self.tabRequestData = TabPanelRTX(self.notebook)
 
-        mainSizer.Add(responseSizer, 1, wx.EXPAND, 5)
+        self.notebook.AddPage(self.tabRequestData, "Body")
+        self.notebook.AddPage(self.tabResponse, "Response")
+
+        mainSizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, 10)
 
         self.SetSizer(mainSizer)
         self.Bind(wx.EVT_SIZE, self.onResize)
@@ -125,13 +125,15 @@ class RequestPanel (wx.Panel):
     def doRequest(self):
         url = self.urlCtrl.GetValue()
         header = self.getHeader()
+        body = self.tabRequestData.dataRTX.GetValue()
         if "http" not in url:
             url = "http://" + url
         method = self.methodChoice.GetString(
             self.methodChoice.GetCurrentSelection())
         try:
             self.lastResponse = request(method=method, url=url,
-                                        headers=header, allow_redirects=False)
+                                        data=body, headers=header,
+                                        allow_redirects=False)
         except ConnectionError as e:
             wx.MessageDialog(
                 self, "Unable to connect, please check your url", caption="Alert").ShowModal()
@@ -141,20 +143,25 @@ class RequestPanel (wx.Panel):
         self.unlockRequests()
         if not self.lastResponse:
             return
-        self.responseRtc.SetEditable(True)
-        self.responseRtc.Clear()
-        self.responseRtc.WriteText(self.lastResponse.text)
-        self.responseRtc.SetEditable(False)
+        self.tabResponse.dataRTX.SetEditable(True)
+        self.tabResponse.dataRTX.Clear()
+        self.tabResponse.dataRTX.WriteText('=' * 80)
+        self.tabResponse.dataRTX.WriteText('\n')
         if self.lastResponse.status_code < 300:
-            self.statusCodeLbl.SetOwnForegroundColour((10, 230, 10))
+            self.tabResponse.dataRTX.BeginTextColour(wx.Colour((10, 230, 10)))
         elif self.lastResponse.status_code < 400:
-            self.statusCodeLbl.SetOwnForegroundColour((125, 125, 10))
+            self.tabResponse.dataRTX.BeginTextColour(wx.Colour((125, 125, 10)))
         else:
-            self.statusCodeLbl.SetOwnForegroundColour((230, 10, 100))
-        self.statusCodeLbl.SetLabel(
-            f'({self.lastResponse.status_code})')
-        self.responseTypeLbl.SetLabel(
-            f'({self.lastResponse.headers["Content-Type"]})')
+            self.tabResponse.dataRTX.BeginTextColour(wx.Colour((230, 10, 100)))
+        self.tabResponse.dataRTX.WriteText(
+            f'Status: {self.lastResponse.status_code}\n')
+        self.tabResponse.dataRTX.EndAllStyles()
+        self.tabResponse.dataRTX.WriteText(
+            f'Content-Type: {self.lastResponse.headers["Content-Type"]}\n')
+        self.tabResponse.dataRTX.WriteText('=' * 80)
+        self.tabResponse.dataRTX.WriteText('\n')
+        self.tabResponse.dataRTX.WriteText(self.lastResponse.text)
+        self.tabResponse.dataRTX.SetEditable(False)
         self.Layout()
 
     def updateHeaderColumnsSize(self):
