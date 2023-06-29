@@ -2,6 +2,7 @@ import wx
 import wx.xrc
 import wx.richtext
 import wx.grid
+from wx import stc
 from threading import Thread
 from requests import request
 from requests.exceptions import ConnectionError
@@ -14,6 +15,107 @@ class TabPanelRTX(wx.Panel):
         self.dataRTX = wx.richtext.RichTextCtrl(
             self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
         mainSizer.Add(self.dataRTX, 1, wx.EXPAND | wx.ALL, 10)
+        self.SetSizer(mainSizer)
+
+
+class TabPanelSTX(wx.Panel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.dataSTX = wx.stc.StyledTextCtrl(
+            self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0)
+        self.dataSTX.StyleClearAll()
+        self.dataSTX.SetUseTabs(False)
+        self.dataSTX.SetTabWidth(4)
+        self.dataSTX.SetIndent(4)
+        self.dataSTX.SetTabIndents(True)
+        self.dataSTX.SetBackSpaceUnIndents(True)
+        self.dataSTX.SetViewEOL(False)
+        self.dataSTX.SetViewWhiteSpace(False)
+        self.dataSTX.SetMarginWidth(2, 0)
+        self.dataSTX.SetIndentationGuides(True)
+        self.dataSTX.SetReadOnly(False)
+        self.dataSTX.SetMarginType(1, wx.stc.STC_MARGIN_SYMBOL)
+        self.dataSTX.SetMarginMask(1, wx.stc.STC_MASK_FOLDERS)
+        self.dataSTX.SetMarginWidth(1, 16)
+        self.dataSTX.SetMarginSensitive(1, True)
+        self.dataSTX.SetProperty("fold", "1")
+        self.dataSTX.SetFoldFlags(
+            wx.stc.STC_FOLDFLAG_LINEBEFORE_CONTRACTED | wx.stc.STC_FOLDFLAG_LINEAFTER_CONTRACTED)
+        self.dataSTX.SetMarginType(0, wx.stc.STC_MARGIN_NUMBER)
+        self.dataSTX.SetMarginWidth(0, self.dataSTX.TextWidth(
+            wx.stc.STC_STYLE_LINENUMBER, "_99999"))
+        self.dataSTX.MarkerDefine(
+            wx.stc.STC_MARKNUM_FOLDER, wx.stc.STC_MARK_BOXPLUS)
+        self.dataSTX.MarkerSetBackground(wx.stc.STC_MARKNUM_FOLDER, wx.BLACK)
+        self.dataSTX.MarkerSetForeground(wx.stc.STC_MARKNUM_FOLDER, wx.WHITE)
+        self.dataSTX.MarkerDefine(
+            wx.stc.STC_MARKNUM_FOLDEROPEN, wx.stc.STC_MARK_BOXMINUS)
+        self.dataSTX.MarkerSetBackground(
+            wx.stc.STC_MARKNUM_FOLDEROPEN, wx.BLACK)
+        self.dataSTX.MarkerSetForeground(
+            wx.stc.STC_MARKNUM_FOLDEROPEN, wx.WHITE)
+        self.dataSTX.MarkerDefine(
+            wx.stc.STC_MARKNUM_FOLDERSUB, wx.stc.STC_MARK_EMPTY)
+        self.dataSTX.MarkerDefine(
+            wx.stc.STC_MARKNUM_FOLDEREND, wx.stc.STC_MARK_BOXPLUS)
+        self.dataSTX.MarkerSetBackground(
+            wx.stc.STC_MARKNUM_FOLDEREND, wx.BLACK)
+        self.dataSTX.MarkerSetForeground(
+            wx.stc.STC_MARKNUM_FOLDEREND, wx.WHITE)
+        self.dataSTX.MarkerDefine(
+            wx.stc.STC_MARKNUM_FOLDEROPENMID, wx.stc.STC_MARK_BOXMINUS)
+        self.dataSTX.MarkerSetBackground(
+            wx.stc.STC_MARKNUM_FOLDEROPENMID, wx.BLACK)
+        self.dataSTX.MarkerSetForeground(
+            wx.stc.STC_MARKNUM_FOLDEROPENMID, wx.WHITE)
+        self.dataSTX.MarkerDefine(
+            wx.stc.STC_MARKNUM_FOLDERMIDTAIL, wx.stc.STC_MARK_EMPTY)
+        self.dataSTX.MarkerDefine(
+            wx.stc.STC_MARKNUM_FOLDERTAIL, wx.stc.STC_MARK_EMPTY)
+        self.dataSTX.SetSelBackground(
+            True, wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT))
+        self.dataSTX.SetSelForeground(
+            True, wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT))
+
+        self.dataSTX.SetLexer(stc.STC_LEX_JSON)
+        self.dataSTX.StyleSetSpec(stc.STC_STYLE_BRACELIGHT,
+                                  "fore:RED,back:MEDIUM TURQUOISE,bold")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
+        self.dataSTX.StyleSetSpec(stc.STC_JSON_BLOCKCOMMENT,
+                                  "fore:#008000,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_COMPACTIRI, "fore:#0000FF,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_DEFAULT, "fore:#000000,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_ERROR, "fore:#FFFF80,back:#FF0000")
+        self.dataSTX.StyleSetSpec(stc.STC_JSON_ESCAPESEQUENCE,
+                                  "fore:#0000FF,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_KEYWORD, "fore:#18AF8A,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(stc.STC_JSON_PROPERTYNAME,
+                                  "fore:#8000FF,back:#FFFFFF,bold")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_LDKEYWORD, "fore:#FF0000,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(stc.STC_JSON_LINECOMMENT,
+                                  "fore:#008000,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_URI, "fore:#0000FF,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_STRINGEOL, "fore=#808080,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_NUMBER, "fore:#FF8000,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_STRING, "fore:#800000,back:#FFFFFF")
+        self.dataSTX.StyleSetSpec(
+            stc.STC_JSON_OPERATOR, "fore:#000000,back:#FFFFFF")
+        self.dataSTX.SetKeyWords(0, 'null false true')
+        self.dataSTX.SetKeyWords(
+            1, '@id @context @type @value @language @container @list @set @reverse @index @base @vocab @graph')
+
+        mainSizer.Add(self.dataSTX, 1, wx.EXPAND | wx.ALL, 10)
         self.SetSizer(mainSizer)
 
 
@@ -58,7 +160,7 @@ class RequestPanel (wx.Panel):
         self.tabResponse = TabPanelRTX(self.notebook)
         self.tabResponse.dataRTX.SetEditable(False)
 
-        self.tabRequestData = TabPanelRTX(self.notebook)
+        self.tabRequestData = TabPanelSTX(self.notebook)
 
         self.notebook.AddPage(self.tabRequestData, "Body")
         self.notebook.AddPage(self.tabResponse, "Response")
@@ -125,7 +227,7 @@ class RequestPanel (wx.Panel):
     def doRequest(self):
         url = self.urlCtrl.GetValue()
         header = self.getHeader()
-        body = self.tabRequestData.dataRTX.GetValue()
+        body = self.tabRequestData.dataSTX.GetValue()
         if "http" not in url:
             url = "http://" + url
         method = self.methodChoice.GetString(
@@ -162,6 +264,7 @@ class RequestPanel (wx.Panel):
         self.tabResponse.dataRTX.WriteText('\n')
         self.tabResponse.dataRTX.WriteText(self.lastResponse.text)
         self.tabResponse.dataRTX.SetEditable(False)
+        self.notebook.SetSelection(1)
         self.Layout()
 
     def updateHeaderColumnsSize(self):
