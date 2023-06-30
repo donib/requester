@@ -135,7 +135,11 @@ class RequestPanel (wx.Panel):
             self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0)
 
         # Grid
-        self.headerGrid.CreateGrid(1, 2)
+        self.headerGrid.CreateGrid(2, 3)
+        self.headerGrid.SetCellRenderer(0, 0, wx.grid.GridCellBoolRenderer())
+        self.headerGrid.SetCellEditor(0, 0, wx.grid.GridCellBoolEditor())
+        self.headerGrid.SetCellRenderer(1, 0, wx.grid.GridCellBoolRenderer())
+        self.headerGrid.SetCellEditor(1, 0, wx.grid.GridCellBoolEditor())
         self.headerGrid.EnableEditing(True)
         self.headerGrid.EnableGridLines(True)
         self.headerGrid.SetMargins(0, 0)
@@ -218,11 +222,16 @@ class RequestPanel (wx.Panel):
         e.Skip()
 
     def onGridEdit(self, e):
+        rows = self.headerGrid.GetNumberRows()
         key = self.headerGrid.GetCellValue(
-            self.headerGrid.GetNumberRows() - 1, 0)
+            rows - 1, 1)
         if str.strip(key):
             self.headerGrid.AppendRows()
-            self.Layout()
+            self.headerGrid.SetCellRenderer(
+                rows, 0, wx.grid.GridCellBoolRenderer())
+            self.headerGrid.SetCellEditor(
+                rows, 0, wx.grid.GridCellBoolEditor())
+            self.updateHeaderColumnsSize()
 
     def doRequest(self):
         url = self.urlCtrl.GetValue()
@@ -269,8 +278,13 @@ class RequestPanel (wx.Panel):
 
     def updateHeaderColumnsSize(self):
         x, _ = self.headerGrid.GetSize()
-        self.headerGrid.SetColSize(0, int(x / 2) - 20)
-        self.headerGrid.SetColSize(1, int(x / 2) - 20)
+        self.headerGrid.SetColSize(0, 30)
+        self.headerGrid.SetColSize(1, int(x / 2) - 30)
+        self.headerGrid.SetColSize(2, int(x / 2) - 30)
+        for i in range(self.headerGrid.GetNumberRows()):
+            self.headerGrid.SetCellAlignment(
+                i, 0, horiz=wx.ALIGN_CENTER, vert=wx.ALIGN_CENTER)
+        self.Layout()
 
     def onResize(self, e):
         self.updateHeaderColumnsSize()
@@ -279,8 +293,9 @@ class RequestPanel (wx.Panel):
     def getHeader(self):
         header = {}
         for row in range(self.headerGrid.GetNumberRows()):
-            header[self.headerGrid.GetCellValue(
-                row, 0)] = self.headerGrid.GetCellValue(row, 1)
+            if self.headerGrid.GetCellValue(row, 0) == '1':
+                header[self.headerGrid.GetCellValue(
+                    row, 1)] = self.headerGrid.GetCellValue(row, 2)
 
         header = {k: header[k] for k in header if k}
         return header
