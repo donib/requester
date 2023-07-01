@@ -135,14 +135,21 @@ class RequestPanel (wx.Panel):
             self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0)
 
         # Grid
-        self.headerGrid.CreateGrid(2, 3)
-        self.headerGrid.SetCellRenderer(0, 0, wx.grid.GridCellBoolRenderer())
-        self.headerGrid.SetCellEditor(0, 0, wx.grid.GridCellBoolEditor())
-        self.headerGrid.SetCellRenderer(1, 0, wx.grid.GridCellBoolRenderer())
-        self.headerGrid.SetCellEditor(1, 0, wx.grid.GridCellBoolEditor())
+        rows = 3
+        self.headerGrid.CreateGrid(3, 3)
+        for i in range(rows):
+            self.headerGrid.SetCellRenderer(
+                i, 0, wx.grid.GridCellBoolRenderer())
+            self.headerGrid.SetCellEditor(i, 0, wx.grid.GridCellBoolEditor())
         self.headerGrid.EnableEditing(True)
         self.headerGrid.EnableGridLines(True)
         self.headerGrid.SetMargins(0, 0)
+
+        self.headerGrid.SetCellValue(0, 0, '1')
+        self.headerGrid.SetCellValue(0, 1, 'Content-Type')
+        self.headerGrid.SetCellValue(0, 2, 'application/json')
+        self.headerGrid.SetCellValue(1, 1, 'Accept')
+        self.headerGrid.SetCellValue(1, 2, 'application/json')
 
         # Rows
         self.headerGrid.AutoSizeRows()
@@ -173,11 +180,12 @@ class RequestPanel (wx.Panel):
 
         self.SetSizer(mainSizer)
         self.Bind(wx.EVT_SIZE, self.onResize)
-        self.Layout()
-
         self.updateHeaderColumnsSize()
 
         self.urlCtrl.SetFocus()
+
+        self.methodChoice.Bind(wx.EVT_CHOICE, self.updateTitle)
+        self.urlCtrl.Bind(wx.EVT_TEXT, self.updateTitle)
 
     def makeRequestSizer(self):
         requestSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -278,6 +286,8 @@ class RequestPanel (wx.Panel):
 
     def updateHeaderColumnsSize(self):
         x, _ = self.headerGrid.GetSize()
+        if x <= 0:
+            return
         self.headerGrid.SetColSize(0, 30)
         self.headerGrid.SetColSize(1, int(x / 2) - 30)
         self.headerGrid.SetColSize(2, int(x / 2) - 30)
@@ -285,6 +295,14 @@ class RequestPanel (wx.Panel):
             self.headerGrid.SetCellAlignment(
                 i, 0, horiz=wx.ALIGN_CENTER, vert=wx.ALIGN_CENTER)
         self.Layout()
+
+    def updateTitle(self, e=None):
+        method = self.methodChoice.GetString(
+            self.methodChoice.GetCurrentSelection())
+        url = self.urlCtrl.GetValue()
+        title = f"{method}: {url}"
+        idx = self.Parent.GetPageIndex(self)
+        self.Parent.SetPageText(page_idx=idx, text=title)
 
     def onResize(self, e):
         self.updateHeaderColumnsSize()
