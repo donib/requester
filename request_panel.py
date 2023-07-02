@@ -2,6 +2,7 @@ import wx
 import wx.xrc
 import wx.richtext
 import wx.grid
+import json
 from wx import stc
 from threading import Thread
 from requests import request
@@ -301,7 +302,12 @@ class RequestPanel (wx.Panel):
             f'Content-Type: {self.lastResponse.headers["Content-Type"]}\n')
         self.tabResponse.dataRTX.WriteText('=' * 80)
         self.tabResponse.dataRTX.WriteText('\n')
-        self.tabResponse.dataRTX.WriteText(self.lastResponse.text)
+        if "/json" in self.lastResponse.headers["Content-Type"]:
+            response = json.dumps(self.lastResponse.json(),
+                                  indent=4, ensure_ascii=False)
+        else:
+            response = self.lastResponse.text
+        self.tabResponse.dataRTX.WriteText(response)
         self.tabResponse.dataRTX.SetEditable(False)
         self.notebook.SetSelection(1)
         self.Layout()
