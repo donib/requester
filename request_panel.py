@@ -121,7 +121,7 @@ class TabPanelSTX(wx.Panel):
 
 class RequestPanel (wx.Panel):
 
-    def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size(800, 500), style=wx.TAB_TRAVERSAL, name=wx.EmptyString):
+    def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size(800, 500), style=wx.TAB_TRAVERSAL, name=wx.EmptyString, session=None):
         wx.Panel.__init__(self, parent, id=id, pos=pos,
                           size=size, style=style, name=name)
 
@@ -135,21 +135,39 @@ class RequestPanel (wx.Panel):
             self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0)
 
         # Grid
-        rows = 3
-        self.headerGrid.CreateGrid(3, 3)
-        for i in range(rows):
-            self.headerGrid.SetCellRenderer(
-                i, 0, wx.grid.GridCellBoolRenderer())
-            self.headerGrid.SetCellEditor(i, 0, wx.grid.GridCellBoolEditor())
+        if session:
+            rows = len(session['header'])
+            self.headerGrid.CreateGrid(rows, 3)
+            for row in range(rows):
+                self.headerGrid.SetCellRenderer(
+                    row, 0, wx.grid.GridCellBoolRenderer())
+                self.headerGrid.SetCellEditor(
+                    row, 0, wx.grid.GridCellBoolEditor())
+                enabled, key, value = session['header'][row]
+                self.headerGrid.SetCellValue(row, 0, enabled)
+                self.headerGrid.SetCellValue(row, 1, key)
+                self.headerGrid.SetCellValue(row, 2, value)
+
+            self.urlCtrl.SetValue(session['url'])
+            self.methodChoice.SetSelection(session['method'])
+        else:
+            rows = 3
+            self.headerGrid.CreateGrid(3, 3)
+            for i in range(rows):
+                self.headerGrid.SetCellRenderer(
+                    i, 0, wx.grid.GridCellBoolRenderer())
+                self.headerGrid.SetCellEditor(
+                    i, 0, wx.grid.GridCellBoolEditor())
+
+            self.headerGrid.SetCellValue(0, 0, '1')
+            self.headerGrid.SetCellValue(0, 1, 'Content-Type')
+            self.headerGrid.SetCellValue(0, 2, 'application/json')
+            self.headerGrid.SetCellValue(1, 1, 'Accept')
+            self.headerGrid.SetCellValue(1, 2, 'application/json')
+
         self.headerGrid.EnableEditing(True)
         self.headerGrid.EnableGridLines(True)
         self.headerGrid.SetMargins(0, 0)
-
-        self.headerGrid.SetCellValue(0, 0, '1')
-        self.headerGrid.SetCellValue(0, 1, 'Content-Type')
-        self.headerGrid.SetCellValue(0, 2, 'application/json')
-        self.headerGrid.SetCellValue(1, 1, 'Accept')
-        self.headerGrid.SetCellValue(1, 2, 'application/json')
 
         # Rows
         self.headerGrid.AutoSizeRows()
@@ -172,6 +190,10 @@ class RequestPanel (wx.Panel):
         self.tabResponse.dataRTX.SetEditable(False)
 
         self.tabRequestData = TabPanelSTX(self.notebook)
+
+        if session:
+            self.tabRequestData.dataSTX.SetValue(session['body'])
+            self.tabResponse.dataRTX.SetValue(session['response'])
 
         self.notebook.AddPage(self.tabRequestData, "Body")
         self.notebook.AddPage(self.tabResponse, "Response")
@@ -207,7 +229,7 @@ class RequestPanel (wx.Panel):
         self.requestButton.Bind(wx.EVT_BUTTON, self.onDoRequest)
         requestSizer.Add(self.requestButton, 0, wx.ALL, 5)
 
-        self.urlCtrl.SetValue("localhost:8020")
+        self.urlCtrl.SetValue("localhost:8080")
 
         return requestSizer
 
@@ -307,6 +329,13 @@ class RequestPanel (wx.Panel):
     def onResize(self, e):
         self.updateHeaderColumnsSize()
         e.Skip()
+
+    def getHeaderTable(self):
+        header = []
+        for row in range(self.headerGrid.GetNumberRows()):
+            header.append((self.headerGrid.GetCellValue(row, 0), self.headerGrid.GetCellValue(
+                row, 1), self.headerGrid.GetCellValue(row, 2)))
+        return header
 
     def getHeader(self):
         header = {}

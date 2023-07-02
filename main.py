@@ -1,3 +1,4 @@
+from request_panel import RequestPanel
 import wx
 import wx.xrc
 import wx.stc
@@ -5,8 +6,12 @@ import wx.lib.agw.aui.auibook
 import sys
 import os
 import time
+import json
 
-from request_panel import RequestPanel
+from platformdirs import user_config_dir
+
+appName = "requester"
+appAuthor = "donib"
 
 bundle_dir = getattr(
     sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
@@ -18,11 +23,13 @@ class MainFrame(wx.Frame):
         super(MainFrame, self).__init__(
             None, title='Requester', size=wx.Size(800, 500))
         icon_path = os.path.abspath(os.path.join(bundle_dir, 'icon.png'))
+        self.confDir = user_config_dir(appname=appName, appauthor=appAuthor)
         self.SetIcon(wx.Icon(icon_path))
 
         self.notebook = wx.lib.agw.aui.auibook.AuiNotebook(
             self, style=wx.EXPAND | wx.ALL)
 
+        self.loadSession()
         self.notebook.Bind(
             wx.lib.agw.aui.auibook.EVT_AUINOTEBOOK_PAGE_CHANGED, self.handleTabChange)
         self.notebook.Bind(
@@ -30,9 +37,11 @@ class MainFrame(wx.Frame):
         self.AddTabPanel = wx.Panel(self.notebook)
 
         # ugly hack
-        self.notebook.AddPage(self.AddTabPanel, "+")
+        self.notebook.AddPage(self.AddTabPanel, "+", select=False)
 
         self.notebook.DoSizing()
+
+        self.Bind(wx.EVT_CLOSE, self.onClose)
 
     def handleTabChange(self, e):
         current = self.notebook.GetCurrentPage()
@@ -52,6 +61,41 @@ class MainFrame(wx.Frame):
             return e.Veto()
 
         self.notebook.AdvanceSelection(False, False)
+        e.Skip()
+
+    def loadSession(self):
+        filePath = os.path.join(self.confDir, "session.json")
+        try:
+            with open(filePath, "r") as fp:
+                session = json.load(fp)
+                for s in session:
+                    newTab = RequestPanel(
+                        self.notebook, session=s)
+                    self.notebook.AddPage(newTab, "New Tab")
+                    newTab.updateTitle()
+                return True
+        except FileNotFoundError:
+            return None
+
+    def saveSession(self):
+        session = []
+        for idx in range(self.notebook.GetPageCount()):
+            page = self.notebook.GetPage(idx)
+            if isinstance(page, RequestPanel):
+                session.append({
+                    "url": page.urlCtrl.GetValue(),
+                    "method": page.methodChoice.GetCurrentSelection(),
+                    "response": page.tabResponse.dataRTX.GetValue(),
+                    "body": page.tabRequestData.dataSTX.GetValue(),
+                    "header": page.getHeaderTable()
+                })
+        os.makedirs(self.confDir, exist_ok=True)
+        filePath = os.path.join(self.confDir, "session.json")
+        with open(filePath, "w") as fp:
+            json.dump(session, fp)
+
+    def onClose(self, e):
+        self.saveSession()
         e.Skip()
 
 
